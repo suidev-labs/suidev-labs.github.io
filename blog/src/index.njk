@@ -1,0 +1,49 @@
+---
+layout: base.njk
+title: ""
+---
+<section class="hero">
+  <h1 class="hero-title">{{ site.title }}</h1>
+  <p class="hero-description">{{ site.description }}</p>
+</section>
+
+<section class="posts-section">
+  <h2 class="section-title">Latest Posts</h2>
+
+  <div class="posts-list">
+    {% set latestPosts = collections.posts | limit(10) %}
+    {% for post in latestPosts %}
+    <article class="post-card">
+      <header class="post-card-header">
+        <h3 class="post-card-title">
+          <a href="{{ post.url }}">{{ post.data.title }}</a>
+        </h3>
+        <div class="post-card-meta">
+          <time datetime="{{ post.date | dateISO }}">{{ post.date | dateDisplay }}</time>
+          {% if post.data.categories and post.data.categories.length %}
+          <span class="post-card-categories">
+            {% for category in post.data.categories %}
+              <a href="/categories/{{ category | slugify }}/">{{ category }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </span>
+          {% endif %}
+        </div>
+      </header>
+      <p class="post-card-excerpt">
+        {% if post.data.excerpt %}
+          {{ post.data.excerpt }}
+        {% else %}
+          {{ post.templateContent | excerpt(200) }}
+        {% endif %}
+      </p>
+      <a href="{{ post.url }}" class="post-card-link">Read more &rarr;</a>
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if collections.posts.length > 10 %}
+  <div class="posts-more">
+    <a href="/archives/" class="btn">View all posts</a>
+  </div>
+  {% endif %}
+</section>

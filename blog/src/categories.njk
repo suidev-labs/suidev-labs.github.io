@@ -1,0 +1,21 @@
+---
+layout: base.njk
+title: Categories
+permalink: /categories/
+---
+<section class="categories-page">
+  <header class="page-header">
+    <h1 class="page-title">Categories</h1>
+    <p class="categories-count">{{ collections.categoryList.length }} categories</p>
+  </header>
+
+  <div class="categories-grid">
+    {% for category in collections.categoryList %}
+    {% set categoryPosts = collections.categories[category] %}
+    <a href="/categories/{{ category | slugify }}/" class="category-card">
+      <h2 class="category-name">{{ category }}</h2>
+      <span class="category-count">{{ categoryPosts.length }} post{% if categoryPosts.length !== 1 %}s{% endif %}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>

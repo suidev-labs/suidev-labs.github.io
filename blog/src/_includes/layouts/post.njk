@@ -1,0 +1,53 @@
+---
+layout: base.njk
+---
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title">{{ title }}</h1>
+    <div class="post-meta">
+      <time datetime="{{ date | dateISO }}">{{ date | dateDisplay }}</time>
+      {% if categories and categories.length %}
+      <span class="post-categories">
+        in
+        {% for category in categories %}
+          <a href="/categories/{{ category | slugify }}/">{{ category }}</a>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </span>
+      {% endif %}
+    </div>
+    {% if tags and tags.length %}
+    <div class="post-tags">
+      {% for tag in tags %}
+        {% if tag !== "posts" %}
+        <span class="tag">{{ tag }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </header>
+
+  <div class="post-content">
+    {{ content | safe }}
+  </div>
+
+  <footer class="post-footer">
+    <nav class="post-nav">
+      {% set previousPost = collections.posts | getPreviousCollectionItem(page) %}
+      {% set nextPost = collections.posts | getNextCollectionItem(page) %}
+
+      {% if previousPost %}
+      <a href="{{ previousPost.url }}" class="post-nav-link prev">
+        <span class="post-nav-label">Previous</span>
+        <span class="post-nav-title">{{ previousPost.data.title }}</span>
+      </a>
+      {% endif %}
+
+      {% if nextPost %}
+      <a href="{{ nextPost.url }}" class="post-nav-link next">
+        <span class="post-nav-label">Next</span>
+        <span class="post-nav-title">{{ nextPost.data.title }}</span>
+      </a>
+      {% endif %}
+    </nav>
+  </footer>
+</article>

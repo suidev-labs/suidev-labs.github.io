@@ -1,0 +1,28 @@
+{
+  "name": "suidev-labs-blog",
+  "version": "1.0.0",
+  "description": "A Sui-dev/DeFi blog built with Eleventy for GitHub Pages",
+  "main": ".eleventy.js",
+  "scripts": {
+    "dev": "eleventy --serve --watch",
+    "build": "eleventy",
+    "clean": "rm -rf _site",
+    "debug": "DEBUG=Eleventy* eleventy"
+  },
+  "keywords": [
+    "sui",
+    "defi",
+    "blockchain",
+    "blog",
+    "eleventy",
+    "11ty"
+  ],
+  "author": "SuiDev Labs",
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "@11ty/eleventy-plugin-rss": "^1.2.0",
+    "@11ty/eleventy-plugin-syntaxhighlight": "^5.0.0",
+    "markdown-it": "^14.0.0"
+  }
+}

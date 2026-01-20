@@ -1,0 +1,17 @@
+{
+  "title": "SuiDev Labs",
+  "description": "Technical insights on Sui blockchain development, DeFi protocols, and Move programming. Tutorials, deep dives, and ecosystem updates.",
+  "tagline": "Building the future of decentralized finance on Sui",
+  "url": "https://suidev-labs.github.io",
+  "org": "suidev-labs",
+  "author": {
+    "name": "SuiDev Labs Team",
+    "email": "team@suidev-labs.io"
+  },
+  "navigation": [
+    { "label": "Home", "url": "/" },
+    { "label": "Archives", "url": "/archives/" },
+    { "label": "Categories", "url": "/categories/" },
+    { "label": "About", "url": "/about/" }
+  ]
+}
