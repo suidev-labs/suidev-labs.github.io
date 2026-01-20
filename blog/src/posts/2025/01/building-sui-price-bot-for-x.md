@@ -25,7 +25,7 @@ Every 3 hours, the bot will:
 
 Example tweet format:
 
-```
+```text
 SUI: $1.23 | 3h: -1.4% | Signal: WATCH | Next update in 3h
 ```
 
@@ -107,7 +107,7 @@ Once the basic bot is running:
 3. Build out the decision engine with my state-binning edge approach
 4. Maybe add chart images to tweets
 
-Follow along as I build this out. The account will be [@suidev](https://x.com/suidev) (placeholder—actual handle TBD).
+Follow along as I build this out.
 
 ---
 

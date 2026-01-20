@@ -1,0 +1,167 @@
+# Blog Post Review Workflow
+# Runs automated checks on PRs that modify blog posts
+
+name: Blog Review
+
+on:
+  pull_request:
+    paths:
+      - 'blog/src/posts/**/*.md'
+
+jobs:
+  structural-review:
+    name: Structural Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            blog/src/posts/**/*.md
+
+      - name: Review blog posts
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "## Blog Post Review" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FAILED=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "### Reviewing: $file" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            ISSUES=""
+
+            # Check frontmatter exists
+            if ! head -1 "$file" | grep -q "^---$"; then
+              ISSUES="$ISSUES\n- ❌ Missing frontmatter"
+              FAILED=1
+            fi
+
+            # Check required frontmatter fields
+            if ! grep -q "^title:" "$file"; then
+              ISSUES="$ISSUES\n- ❌ Missing title in frontmatter"
+              FAILED=1
+            fi
+
+            if ! grep -q "^date:" "$file"; then
+              ISSUES="$ISSUES\n- ❌ Missing date in frontmatter"
+              FAILED=1
+            fi
+
+            if ! grep -q "^categories:" "$file"; then
+              ISSUES="$ISSUES\n- ⚠️ Missing categories"
+            fi
+
+            if ! grep -q "^excerpt:" "$file"; then
+              ISSUES="$ISSUES\n- ⚠️ Missing excerpt"
+            fi
+
+            # Check for code blocks without language
+            if grep -q '```$' "$file"; then
+              ISSUES="$ISSUES\n- ⚠️ Code block(s) without language identifier"
+            fi
+
+            # Check for placeholder text
+            if grep -qi "TODO\|TBD\|FIXME\|example\.com\|placeholder" "$file"; then
+              ISSUES="$ISSUES\n- ❌ Contains placeholder text (TODO/TBD/example.com)"
+              FAILED=1
+            fi
+
+            # Check excerpt length
+            EXCERPT=$(grep "^excerpt:" "$file" | sed 's/^excerpt: *//' | tr -d '"')
+            if [ -n "$EXCERPT" ] && [ ${#EXCERPT} -gt 200 ]; then
+              ISSUES="$ISSUES\n- ⚠️ Excerpt exceeds 200 characters (${#EXCERPT} chars)"
+            fi
+
+            # Check for weasel words (warning only)
+            WEASELS=$(grep -oi '\b\(very\|really\|basically\|actually\|just\)\b' "$file" | wc -l)
+            if [ "$WEASELS" -gt 3 ]; then
+              ISSUES="$ISSUES\n- ⚠️ High weasel word count ($WEASELS instances)"
+            fi
+
+            if [ -z "$ISSUES" ]; then
+              echo "✅ All structural checks passed" >> $GITHUB_STEP_SUMMARY
+            else
+              echo -e "$ISSUES" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done
+
+          if [ $FAILED -eq 1 ]; then
+            echo "::error::Blog post review failed. See summary for details."
+            exit 1
+          fi
+
+  # Optional: AI-powered review (requires ANTHROPIC_API_KEY secret)
+  ai-review:
+    name: AI Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    continue-on-error: true  # Don't block PR if AI review fails
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+            blog/src/posts/**/*.md
+
+      - name: AI Review (if API key configured)
+        if: steps.changed-files.outputs.any_changed == 'true' && env.ANTHROPIC_API_KEY != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "## AI Review" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "AI review would run here with Claude API." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To enable:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Add ANTHROPIC_API_KEY to repository secrets" >> $GITHUB_STEP_SUMMARY
+          echo "2. The review will use the blog-reviewer agent prompt" >> $GITHUB_STEP_SUMMARY
+
+          # TODO: Implement actual Claude API call
+          # For now, this is a placeholder that shows the structure
+          #
+          # Example implementation:
+          # for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          #   CONTENT=$(cat "$file")
+          #   REVIEW=$(curl -s https://api.anthropic.com/v1/messages \
+          #     -H "x-api-key: $ANTHROPIC_API_KEY" \
+          #     -H "anthropic-version: 2023-06-01" \
+          #     -H "content-type: application/json" \
+          #     -d "{
+          #       \"model\": \"claude-sonnet-4-20250514\",
+          #       \"max_tokens\": 1024,
+          #       \"system\": \"$(cat .github/agents/blog-reviewer.md)\",
+          #       \"messages\": [{\"role\": \"user\", \"content\": \"Review this blog post:\\n\\n$CONTENT\"}]
+          #     }")
+          #   echo "$REVIEW" >> $GITHUB_STEP_SUMMARY
+          # done
+
+      - name: Skip AI Review
+        if: steps.changed-files.outputs.any_changed == 'true' && env.ANTHROPIC_API_KEY == ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "## AI Review" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ Skipped - ANTHROPIC_API_KEY not configured" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To enable AI-powered review:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to Settings → Secrets → Actions" >> $GITHUB_STEP_SUMMARY
+          echo "2. Add ANTHROPIC_API_KEY secret" >> $GITHUB_STEP_SUMMARY
