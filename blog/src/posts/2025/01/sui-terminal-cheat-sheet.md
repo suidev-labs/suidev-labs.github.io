@@ -15,6 +15,8 @@ excerpt: "33 curl and CLI commands for Sui developers—check balances, query De
 
 Your terminal is a powerful DeFi dashboard. These 33 commands let you query Sui state, monitor protocols, and track on-chain activity without touching a browser.
 
+![Sui Terminal Cheat Sheet Infographic](/assets/images/sui-cheat-sheet.png)
+
 ## Core: Account & Asset Management
 
 ### Check All Token Balances
