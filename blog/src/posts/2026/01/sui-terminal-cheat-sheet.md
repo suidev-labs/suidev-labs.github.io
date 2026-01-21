@@ -1,6 +1,6 @@
 ---
 title: "The Sui Developer's Terminal Cheat Sheet: 33 Essential Commands"
-date: 2025-01-20
+date: 2026-01-20
 categories:
   - Tutorials
   - DeFi
